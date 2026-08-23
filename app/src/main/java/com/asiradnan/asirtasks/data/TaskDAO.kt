@@ -39,6 +39,9 @@ interface TaskDAO {
     @Query("SELECT * FROM tasks WHERE isSynced = 0")
     suspend fun getUnsyncedTasks(): List<Task>
 
+    @Query("SELECT COUNT(*) FROM tasks WHERE isSynced = 0")
+    fun getUnsyncedTasksCountStream(): Flow<Int>
+
     @Query("SELECT * FROM tasks")
     suspend fun getAllTasksSync(): List<Task>
 

@@ -76,12 +76,14 @@ class HomeViewModel(
         authRepository.isLoggedIn,
         userPreferencesManager.lastSyncTime,
         isSyncing,
-        connectivityObserver.isConnected
-    ) { loggedIn, lastSync, syncing, online ->
+        connectivityObserver.isConnected,
+        tasksRepository.getUnsyncedTasksCountStream()
+    ) { loggedIn, lastSync, syncing, online, unsyncedCount ->
         when {
             !loggedIn -> SyncStatus.NotLoggedIn
             syncing -> SyncStatus.Syncing
             !online -> SyncStatus.Offline
+            unsyncedCount > 0 -> SyncStatus.Unsynced(unsyncedCount)
             else -> SyncStatus.Synced(lastSync ?: 0L)
         }
     }.stateIn(
@@ -129,5 +131,6 @@ sealed class SyncStatus {
     object NotLoggedIn : SyncStatus()
     object Syncing : SyncStatus()
     object Offline : SyncStatus()
+    data class Unsynced(val count: Int) : SyncStatus()
     data class Synced(val lastSyncTime: Long) : SyncStatus()
 }

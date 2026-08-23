@@ -64,6 +64,7 @@ import com.asiradnan.asirtasks.R
 import com.asiradnan.asirtasks.data.Task
 import com.asiradnan.asirtasks.util.toFormattedDate
 import com.asiradnan.asirtasks.util.toFormattedTime
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -183,7 +184,9 @@ fun HomeBody(
             }
         } else {
             if (incompletedTaskList.isNotEmpty()) {
-                itemsIndexed(incompletedTaskList, key = { _, task -> task.uuid }) { index, task ->
+                itemsIndexed(
+                    incompletedTaskList,
+                    key = { _, task -> "${task.uuid}_incomplete" }) { index, task ->
                     val isFirst = index == 0
                     val isLast = index == incompletedTaskList.size - 1
                     val shape = when {
@@ -260,7 +263,9 @@ fun HomeBody(
                 }
 
                 if (isCompletedExpanded) {
-                    itemsIndexed(completedTaskList, key = { _, task -> task.uuid }) { index, task ->
+                    itemsIndexed(
+                        completedTaskList,
+                        key = { _, task -> "${task.uuid}_completed" }) { index, task ->
                         val isLast = index == completedTaskList.size - 1
                         val shape = if (isLast) {
                             RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
@@ -300,20 +305,32 @@ fun TaskCard(
     modifier: Modifier = Modifier, task: Task,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    var localIsCompleted by remember(
+        task.uuid,
+        task.isCompleted
+    ) { mutableStateOf(task.isCompleted) }
+    val coroutineScope = rememberCoroutineScope()
+
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         CircularCheckbox(
-            checked = task.isCompleted,
-            onCheckedChange = {
-                onCheckedChange(it)
+            checked = localIsCompleted,
+            onCheckedChange = { isChecked ->
+                if (localIsCompleted != isChecked) {
+                    localIsCompleted = isChecked
+                    coroutineScope.launch {
+                        delay(400) // give time for animation (300ms) plus a slight pause
+                        onCheckedChange(isChecked)
+                    }
+                }
             },
             modifier = Modifier.padding(end = 4.dp)
         )
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
             val progress by animateFloatAsState(
-                targetValue = if (task.isCompleted) 1f else 0f,
+                targetValue = if (localIsCompleted) 1f else 0f,
                 animationSpec = tween(durationMillis = 300),
                 label = "strikethrough_progress"
             )

@@ -21,6 +21,9 @@ class DefaultTasksRepository(
 
     override fun getTaskStream(uuid: String): Flow<Task?> = taskDao.getTask(uuid)
 
+    override fun getUnsyncedTasksCountStream(): Flow<Int> = taskDao.getUnsyncedTasksCountStream()
+
+
     override suspend fun addTask(task: Task) {
         taskDao.insert(task.copy(isSynced = false, modificationTime = System.currentTimeMillis()))
         alarmScheduler.scheduleTaskNotification(task)

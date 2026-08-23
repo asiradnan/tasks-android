@@ -7,6 +7,9 @@ interface TasksRepository {
 
     fun getTaskStream(uuid: String): Flow<Task?>
 
+    fun getUnsyncedTasksCountStream(): Flow<Int>
+
+
     suspend fun addTask(task: Task)
 
     suspend fun updateTask(task: Task)
