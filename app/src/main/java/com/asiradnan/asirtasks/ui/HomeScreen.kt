@@ -1,8 +1,17 @@
 package com.asiradnan.asirtasks.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.Icons.Filled
@@ -41,10 +51,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -172,44 +183,68 @@ fun HomeBody(
             }
         } else {
             if (incompletedTaskList.isNotEmpty()) {
-                item {
-                    Column(
+                itemsIndexed(incompletedTaskList, key = { _, task -> task.uuid }) { index, task ->
+                    val isFirst = index == 0
+                    val isLast = index == incompletedTaskList.size - 1
+                    val shape = when {
+                        incompletedTaskList.size == 1 -> RoundedCornerShape(12.dp)
+                        isFirst -> RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
+                        isLast -> RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
+                        else -> RoundedCornerShape(0.dp)
+                    }
+
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp)
-                            .clip(shape = RoundedCornerShape(12.dp))
+                            .clip(shape)
                             .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
-                            .padding(vertical = 8.dp)
+                            .animateItem()
                     ) {
-                        incompletedTaskList.forEach { task ->
-                            TaskCard(
-                                task = task,
-                                modifier = Modifier.clickable { onTaskClick(task.uuid) },
-                                onCheckedChange = { isCompleted ->
-                                    onToggleTaskCompletion(task, isCompleted)
-                                }
-                            )
-                        }
+                        TaskCard(
+                            task = task,
+                            modifier = Modifier
+                                .clickable { onTaskClick(task.uuid) }
+                                .padding(
+                                    top = if (isFirst) 8.dp else 0.dp,
+                                    bottom = if (isLast) 8.dp else 0.dp
+                                ),
+                            onCheckedChange = { isCompleted ->
+                                onToggleTaskCompletion(task, isCompleted)
+                            }
+                        )
                     }
                 }
             }
             if (completedTaskList.isNotEmpty()) {
-                if (incompletedTaskList.isNotEmpty())
-                    item { Spacer(Modifier.height(12.dp)) }
-                item {
-                    Column(
+                if (incompletedTaskList.isNotEmpty()) {
+                    item(key = "spacer_completed") {
+                        Spacer(Modifier
+                            .height(12.dp)
+                            .animateItem())
+                    }
+                }
+
+                item(key = "header_completed") {
+                    val shape = if (isCompletedExpanded) {
+                        RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
+                    } else {
+                        RoundedCornerShape(12.dp)
+                    }
+
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp)
-                            .clip(shape = RoundedCornerShape(12.dp))
+                            .clip(shape)
                             .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
-                            .padding(vertical = 8.dp)
+                            .animateItem()
                     ) {
                         Row(
                             modifier = Modifier
                                 .clickable { isCompletedExpanded = !isCompletedExpanded }
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp),
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
@@ -221,19 +256,37 @@ fun HomeBody(
                                 contentDescription = if (isCompletedExpanded) "Collapse" else "Expand"
                             )
                         }
+                    }
+                }
 
-                        if (isCompletedExpanded) {
-                            completedTaskList.forEach { task ->
-                                TaskCard(
-                                    task = task,
-                                    modifier = Modifier
-                                        .clickable { onTaskClick(task.uuid) }
-                                        .animateItem(),
-                                    onCheckedChange = { isCompleted ->
-                                        onToggleTaskCompletion(task, isCompleted)
-                                    }
-                                )
-                            }
+                if (isCompletedExpanded) {
+                    itemsIndexed(completedTaskList, key = { _, task -> task.uuid }) { index, task ->
+                        val isLast = index == completedTaskList.size - 1
+                        val shape = if (isLast) {
+                            RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
+                        } else {
+                            RoundedCornerShape(0.dp)
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                                .clip(shape)
+                                .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
+                                .animateItem()
+                        ) {
+                            TaskCard(
+                                task = task,
+                                modifier = Modifier
+                                    .clickable { onTaskClick(task.uuid) }
+                                    .padding(
+                                        bottom = if (isLast) 8.dp else 0.dp
+                                    ),
+                                onCheckedChange = { isCompleted ->
+                                    onToggleTaskCompletion(task, isCompleted)
+                                }
+                            )
                         }
                     }
                 }
@@ -259,12 +312,30 @@ fun TaskCard(
             modifier = Modifier.padding(end = 4.dp)
         )
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            val progress by animateFloatAsState(
+                targetValue = if (task.isCompleted) 1f else 0f,
+                animationSpec = tween(durationMillis = 300),
+                label = "strikethrough_progress"
+            )
+            val textColor = MaterialTheme.colorScheme.onSurface
+            
             Text(
                 text = task.name,
                 fontSize = 16.sp,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
-                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = textColor.copy(alpha = 1f - (0.5f * progress)),
+                modifier = Modifier.drawWithContent {
+                    drawContent()
+                    if (progress > 0f) {
+                        val lineY = size.height / 2f
+                        drawLine(
+                            color = textColor,
+                            start = Offset(0f, lineY),
+                            end = Offset(size.width * progress, lineY),
+                            strokeWidth = 1.5.dp.toPx()
+                        )
+                    }
+                }
             )
             if (task.time != null || task.date != null) {
                 Spacer(modifier = Modifier.height(4.dp))
@@ -300,12 +371,20 @@ fun CircularCheckbox(
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             onCheckedChange(!checked)
         }) {
-        Icon(
-            imageVector = if (checked) Filled.Check else Icons.Outlined.Circle,
-            contentDescription = if (checked) "Uncheck task" else "Check task",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp)
-        )
+        AnimatedContent(
+            targetState = checked,
+            transitionSpec = {
+                (scaleIn() + fadeIn()).togetherWith(scaleOut() + fadeOut())
+            },
+            label = "checkbox_animation"
+        ) { isChecked ->
+            Icon(
+                imageVector = if (isChecked) Filled.Check else Icons.Outlined.Circle,
+                contentDescription = if (isChecked) "Uncheck task" else "Check task",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
 
