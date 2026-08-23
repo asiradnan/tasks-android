@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +44,7 @@ fun SyncStatusIcon(status: SyncStatus, onClick: () -> Unit) {
         is SyncStatus.NotLoggedIn -> rememberVectorPainter(Icons.Default.PersonOff) to AppTheme.syncColors.muted
         is SyncStatus.Syncing -> rememberVectorPainter(Icons.Default.Sync) to MaterialTheme.colorScheme.onSurfaceVariant
         is SyncStatus.Offline -> painterResource(R.drawable.sync_saved_locally_off_24px) to AppTheme.syncColors.muted
-        is SyncStatus.Unsynced -> painterResource(R.drawable.sync_saved_locally_24px) to MaterialTheme.colorScheme.primary
+        is SyncStatus.Unsynced -> rememberVectorPainter(Icons.Default.CloudUpload) to MaterialTheme.colorScheme.primary
         is SyncStatus.Synced -> painterResource(R.drawable.sync_saved_locally_24px) to MaterialTheme.colorScheme.onSurfaceVariant
 
     }

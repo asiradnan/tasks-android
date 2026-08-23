@@ -22,8 +22,11 @@ private val LightContainer = Color(0xFFE3E3E3)
 private val LightContainerHigh = Color(0xFFD5D5D5)
 private val LightContainerLow = Color(0xFFEFEFEF)
 
+private val AccentBlueLight = Color(0xFF2962FF)
+private val AccentBlueDark = Color(0xFF448AFF)
+
 private val DarkColorScheme = darkColorScheme(
-    primary = Color.White,
+    primary = AccentBlueDark,
     onPrimary = Color.Black,
     secondary = Color.White,
     onSecondary = Color.Black,
@@ -52,7 +55,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color.Black,
+    primary = AccentBlueLight,
     onPrimary = Color.White,
     secondary = Color.Black,
     onSecondary = Color.White,

@@ -9,9 +9,11 @@ import com.asiradnan.asirtasks.auth.data.AuthRepository
 import com.asiradnan.asirtasks.data.Task
 import com.asiradnan.asirtasks.data.TasksRepository
 import com.asiradnan.asirtasks.util.NetworkConnectivityObserver
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -29,6 +31,9 @@ class HomeViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _syncErrorMessage = MutableSharedFlow<String>()
+    val syncErrorMessage = _syncErrorMessage.asSharedFlow()
+
     init {
         viewModelScope.launch {
             authRepository.isLoggedIn.collect { loggedIn ->
@@ -44,6 +49,8 @@ class HomeViewModel(
             _isRefreshing.value = true
             try {
                 tasksRepository.refreshTasksFromServer()
+            } catch (e: Exception) {
+                _syncErrorMessage.emit("Sync failed: ${e.localizedMessage ?: "Unknown error"}")
             } finally {
                 _isRefreshing.value = false
             }
@@ -82,8 +89,8 @@ class HomeViewModel(
         when {
             !loggedIn -> SyncStatus.NotLoggedIn
             syncing -> SyncStatus.Syncing
-            !online -> SyncStatus.Offline
             unsyncedCount > 0 -> SyncStatus.Unsynced(unsyncedCount)
+            !online -> SyncStatus.Offline
             else -> SyncStatus.Synced(lastSync ?: 0L)
         }
     }.stateIn(

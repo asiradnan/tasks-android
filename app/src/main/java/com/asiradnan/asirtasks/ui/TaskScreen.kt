@@ -58,7 +58,6 @@ import com.asiradnan.asirtasks.util.toFormattedTime
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 @Composable
 fun TaskAddScreen(
@@ -162,7 +161,6 @@ fun ConfirmDeletionAlert(
             }
         })
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskBody(
@@ -205,7 +203,7 @@ fun TaskBody(
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
                     unfocusedIndicatorColor = Color.Transparent
                 )
             )
@@ -220,7 +218,7 @@ fun TaskBody(
                     Spacer(Modifier.width(12.dp))
                     Text(
                         text = if (taskDetails.date != null) {
-                            SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(
+                            SimpleDateFormat("MMM dd, yyyy", androidx.compose.ui.text.intl.Locale.current.platformLocale).format(
                                 Date(taskDetails.date)
                             )
                         } else {

@@ -72,6 +72,9 @@ class SyncWorker(
                             finalTasksToUpsert.add(task.copy(isSynced = true))
                         }
                     } catch (e: Exception) {
+                        if (e is HttpException && (e.code() == 401 || e.code() == 403)) {
+                            throw e // Rethrow to trigger outer logout logic
+                        }
                         Log.e("SyncWorker", "Failed to sync task ${task.uuid}: ${e.message}")
                     }
                 }
@@ -83,6 +86,9 @@ class SyncWorker(
                         taskApiService.deleteTask(task.uuid)
                         finalTasksToDelete.add(task)
                     } catch (e: Exception) {
+                        if (e is HttpException && (e.code() == 401 || e.code() == 403)) {
+                            throw e // Rethrow to trigger outer logout logic
+                        }
                         if (e is HttpException && e.code() == 404) {
                             finalTasksToDelete.add(task)
                         }
@@ -110,7 +116,10 @@ class SyncWorker(
 
                 Result.success()
             } catch (e: HttpException) {
-                if (e.code() == 401 || e.code() == 403) return@withContext Result.failure()
+                if (e.code() == 401 || e.code() == 403) {
+                    container.tokenManager.clearTokens()
+                    return@withContext Result.failure()
+                }
                 Result.retry()
             } catch (_: IOException) {
                 Result.retry() // Retry on network errors
