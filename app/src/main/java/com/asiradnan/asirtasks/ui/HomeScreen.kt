@@ -38,9 +38,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,10 +86,16 @@ fun HomeScreen(
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val isDarkModePref by viewModel.isDarkMode.collectAsState()
     val effectiveDarkMode = isDarkModePref ?: androidx.compose.foundation.isSystemInDarkTheme()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-
+    LaunchedEffect(viewModel) {
+        viewModel.syncErrorMessage.collect { message ->
+            snackbarHostState.showSnackbar(message = message)
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             AsirTasksTopAppBar(
                 title = "Tasks",
