@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
@@ -127,8 +126,6 @@ fun AsirTasksTopAppBar(
     disableSaveButton: Boolean = false,
     showDeleteButton: Boolean = false,
     onActionClick: () -> Unit = {},
-    showUserButton: Boolean = false,
-    onUserClick: () -> Unit = {},
     syncStatus: SyncStatus? = null,
     onSyncClick: () -> Unit = {},
     isLoggedIn: Boolean = false,
@@ -210,14 +207,6 @@ fun AsirTasksTopAppBar(
                         contentDescription = stringResource(R.string.delete_task)
                     )
                 }
-            if (showUserButton) {
-                IconButton(onClick = onUserClick) {
-                    Icon(
-                        imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = "User Profile"
-                    )
-                }
-            }
 
         }
     )
