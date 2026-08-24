@@ -1,6 +1,5 @@
 package com.asiradnan.asirtasks.ui
 
-import UserPreferencesManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
@@ -8,6 +7,7 @@ import androidx.work.WorkManager
 import com.asiradnan.asirtasks.auth.data.AuthRepository
 import com.asiradnan.asirtasks.data.Task
 import com.asiradnan.asirtasks.data.TasksRepository
+import com.asiradnan.asirtasks.data.UserPreferencesManager
 import com.asiradnan.asirtasks.util.NetworkConnectivityObserver
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

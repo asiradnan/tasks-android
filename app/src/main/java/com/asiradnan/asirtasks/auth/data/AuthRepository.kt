@@ -1,6 +1,5 @@
 package com.asiradnan.asirtasks.auth.data
 
-import android.util.Log
 import com.asiradnan.asirtasks.auth.models.LoginRequest
 import com.asiradnan.asirtasks.auth.network.AuthApiService
 import kotlinx.coroutines.flow.Flow
@@ -23,12 +22,12 @@ class DefaultAuthRepository(
     override suspend fun login(loginRequest: LoginRequest): Result<Unit> {
         return try {
             val tokens = authApiService.login(loginRequest)
-            Log.d("asiradnan", tokens.toString())
+            // Log.d("asiradnan", tokens.toString())
             tokenManager.saveTokens(tokens.accessToken, tokens.refreshToken)
-            Log.d(
-                "AuthRepository",
-                "Saving tokens: access=$tokens.accessToken, refresh=$tokens.refreshToken"
-            )
+            // Log.d(
+            //     "AuthRepository",
+            //     "Saving tokens: access=${tokens.accessToken}, refresh=${tokens.refreshToken}"
+            // )
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

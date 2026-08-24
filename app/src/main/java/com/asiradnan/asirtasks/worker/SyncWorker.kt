@@ -58,14 +58,14 @@ class SyncWorker(
                         } else {
                             taskApiService.createTask(networkTask)
                         }
-                        Log.d("asiradnan", networkTask.toString())
-                        Log.d("asiradnan", serverResponse.toString())
+                        // Log.d("asiradnan", networkTask.toString())
+                        // Log.d("asiradnan", serverResponse.toString())
 
                         if (task.uuid != serverResponse.uuid) {
-                            Log.d(
-                                "asiradnan",
-                                "UUID changed from ${task.uuid} to ${serverResponse.uuid}"
-                            )
+                            // Log.d(
+                            //     "asiradnan",
+                            //     "UUID changed from ${task.uuid} to ${serverResponse.uuid}"
+                            // )
                             finalTasksToDelete.add(task)
                             finalTasksToUpsert.add(serverResponse.toEntity().copy(isSynced = true))
                         } else {
