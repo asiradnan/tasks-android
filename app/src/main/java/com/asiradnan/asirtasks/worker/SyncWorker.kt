@@ -116,14 +116,16 @@ class SyncWorker(
 
                 Result.success()
             } catch (e: HttpException) {
+                Log.e("SyncWorker", "HttpException in sync: ${e.code()}", e)
                 if (e.code() == 401 || e.code() == 403) {
-                    container.tokenManager.clearTokens()
                     return@withContext Result.failure()
                 }
                 Result.retry()
-            } catch (_: IOException) {
+            } catch (e: IOException) {
+                Log.e("SyncWorker", "IOException in sync", e)
                 Result.retry() // Retry on network errors
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("SyncWorker", "Unknown exception in sync", e)
                 Result.failure() // Permanent failure for unknown errors
             }
         }

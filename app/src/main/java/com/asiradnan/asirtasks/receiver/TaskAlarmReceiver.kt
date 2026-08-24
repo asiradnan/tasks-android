@@ -10,6 +10,9 @@ import com.asiradnan.asirtasks.util.toFormattedTime
 
 class TaskAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (com.asiradnan.asirtasks.AsirTasksApplication.isAppInForeground) {
+            return
+        }
         val taskName = intent.getStringExtra("TASK_NAME") ?: "Task Reminder"
         val taskId = intent.getStringExtra("TASK_UUID") ?: return
         val taskTime =

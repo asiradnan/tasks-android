@@ -24,7 +24,7 @@ class TokenAuthenticator(
             "TokenAuthenticator",
             "authenticate() called, priorResponse=${response.priorResponse != null}"
         )
-        if (response.priorResponse != null) return null
+        if (responseCount(response) >= 3) return null
 
         val refreshToken = runBlocking { tokenManager.refreshToken.first() }
         Log.d("TokenAuthenticator", "refreshToken from storage: $refreshToken")
@@ -78,5 +78,15 @@ class TokenAuthenticator(
                 null
             }
         }
+    }
+
+    private fun responseCount(response: Response?): Int {
+        var result = 1
+        var current = response
+        while (current?.priorResponse != null) {
+            result++
+            current = current.priorResponse
+        }
+        return result
     }
 }

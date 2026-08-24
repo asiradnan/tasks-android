@@ -1,8 +1,10 @@
 package com.asiradnan.asirtasks
 
+import android.app.Activity
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.os.Bundle
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -14,12 +16,21 @@ import com.asiradnan.asirtasks.worker.SyncWorker
 import java.util.concurrent.TimeUnit
 
 
-class AsirTasksApplication : Application() {
+class AsirTasksApplication : Application(), Application.ActivityLifecycleCallbacks {
     lateinit var container: AppContainer
+
+    companion object {
+        var isAppInForeground = false
+            private set
+    }
+
+    private var activityReferences = 0
+    private var isActivityChangingConfigurations = false
 
     override fun onCreate() {
         super.onCreate()
         container = AppDataContainer(this)
+        registerActivityLifecycleCallbacks(this)
 
         createNotificationChannel()
 
@@ -50,4 +61,23 @@ class AsirTasksApplication : Application() {
             getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(channel)
     }
+
+    override fun onActivityStarted(activity: Activity) {
+        if (++activityReferences == 1 && !isActivityChangingConfigurations) {
+            isAppInForeground = true
+        }
+    }
+
+    override fun onActivityStopped(activity: Activity) {
+        isActivityChangingConfigurations = activity.isChangingConfigurations
+        if (--activityReferences == 0 && !isActivityChangingConfigurations) {
+            isAppInForeground = false
+        }
+    }
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityResumed(activity: Activity) {}
+    override fun onActivityPaused(activity: Activity) {}
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+    override fun onActivityDestroyed(activity: Activity) {}
 }
