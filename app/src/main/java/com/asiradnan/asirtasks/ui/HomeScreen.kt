@@ -139,7 +139,7 @@ fun HomeScreen(
         ) {
             HomeBody(
                 modifier = Modifier.fillMaxSize(),
-                taskList = homeUiState.taskList,
+                uiState = homeUiState,
                 onTaskClick = navigateToTaskEdit,
                 onToggleTaskCompletion = { task, isCompleted ->
                     coroutineScope.launch {
@@ -185,10 +185,11 @@ fun HomeScreen(
 @Composable
 fun HomeBody(
     modifier: Modifier = Modifier,
-    taskList: List<Task>,
+    uiState: HomeUiState,
     onTaskClick: (taskId: String) -> Unit,
     onToggleTaskCompletion: (task: Task, isCompleted: Boolean) -> Unit
 ) {
+    val taskList = uiState.taskList
     val completedTaskList = taskList.filter { it.isCompleted }.reversed()
     val incompletedTaskList = taskList.filter { !it.isCompleted }
     var isCompletedExpanded by rememberSaveable { mutableStateOf(false) }
@@ -198,7 +199,16 @@ fun HomeBody(
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(vertical = 8.dp)
     ) {
-        if (taskList.isEmpty()) {
+        if (uiState.isLoading) {
+            item {
+                Box(
+                    modifier = Modifier.fillParentMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.CircularProgressIndicator()
+                }
+            }
+        } else if (taskList.isEmpty()) {
             item {
                 Column(
                     modifier = Modifier

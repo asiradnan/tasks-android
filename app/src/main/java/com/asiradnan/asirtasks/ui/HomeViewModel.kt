@@ -67,11 +67,11 @@ class HomeViewModel(
      * [HomeUiState]
      */
     val homeUiState: StateFlow<HomeUiState> =
-        tasksRepository.getAllTasksStream().map { HomeUiState(it) }
+        tasksRepository.getAllTasksStream().map { HomeUiState(taskList = it, isLoading = false) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = HomeUiState()
+                initialValue = HomeUiState(isLoading = true)
             )
 
     private val isSyncing = workManager
@@ -133,7 +133,7 @@ class HomeViewModel(
 /**
  * Ui State for HomeScreen
  */
-data class HomeUiState(val taskList: List<Task> = listOf())
+data class HomeUiState(val taskList: List<Task> = listOf(), val isLoading: Boolean = true)
 
 sealed class SyncStatus {
     object NotLoggedIn : SyncStatus()
