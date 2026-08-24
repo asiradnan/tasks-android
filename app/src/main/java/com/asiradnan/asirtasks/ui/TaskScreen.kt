@@ -192,6 +192,15 @@ fun TaskBody(
         var showTimePicker by remember { mutableStateOf(false) }
         var showSettingsDialog by remember { mutableStateOf(false) }
         val context = LocalContext.current
+        val prefs = context.getSharedPreferences("task_prefs", android.content.Context.MODE_PRIVATE)
+        var dontAskPermission by remember {
+            mutableStateOf(
+                prefs.getBoolean(
+                    "dont_ask_notification",
+                    false
+                )
+            )
+        }
         val notificationPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
             onResult = { isGranted ->
@@ -225,8 +234,12 @@ fun TaskBody(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showSettingsDialog = false }) {
-                        Text("Cancel")
+                    TextButton(onClick = {
+                        showSettingsDialog = false
+                        dontAskPermission = true
+                        prefs.edit().putBoolean("dont_ask_notification", true).apply()
+                    }) {
+                        Text("Don't ask again")
                     }
                 }
             )
@@ -276,7 +289,7 @@ fun TaskBody(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !dontAskPermission) {
                                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             }
                             showDatePicker = true
@@ -307,7 +320,7 @@ fun TaskBody(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !dontAskPermission) {
                                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             }
                             showTimePicker = true
