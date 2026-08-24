@@ -7,6 +7,8 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -238,6 +240,14 @@ fun TaskBody(
                 .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            val animatedTextColor by animateColorAsState(
+                targetValue = if (taskDetails.isCompleted) MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 0.5f
+                ) else MaterialTheme.colorScheme.onSurface,
+                animationSpec = tween(durationMillis = 300),
+                label = "textColorAnimation"
+            )
+
             TextField(
                 value = taskDetails.name,
                 onValueChange = { onValueChange(taskDetails.copy(name = it)) },
@@ -248,14 +258,17 @@ fun TaskBody(
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
                 textStyle = MaterialTheme.typography.headlineSmall.copy(
-                    textDecoration = if (taskDetails.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                    textDecoration = if (taskDetails.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
+                    color = animatedTextColor
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                    disabledIndicatorColor = Color.Transparent,
+                    focusedTextColor = animatedTextColor,
+                    unfocusedTextColor = animatedTextColor
                 )
             )
 
