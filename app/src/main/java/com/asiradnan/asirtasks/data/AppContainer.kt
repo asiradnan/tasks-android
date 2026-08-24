@@ -54,17 +54,6 @@ class AppDataContainer(private val context: Context) : AppContainer {
         .writeTimeout(120, TimeUnit.SECONDS)
 
     private val okHttpClient: OkHttpClient = baseOkHttpClientBuilder
-        .addNetworkInterceptor { chain ->
-            val response = chain.proceed(chain.request())
-            if (response.code == 403) {
-                response.newBuilder()
-                    .code(401)
-                    .message("Converted 403 to 401 to trigger Authenticator")
-                    .build()
-            } else {
-                response
-            }
-        }
         .addInterceptor(AuthInterceptor(tokenManager))
         .authenticator(TokenAuthenticator(tokenManager) { refreshToken ->
             authApiService.refreshToken(RefreshRequest(refreshToken))
@@ -80,7 +69,7 @@ class AppDataContainer(private val context: Context) : AppContainer {
         .build()
 
     private val retrofit: Retrofit = Retrofit.Builder()
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .baseUrl(baseUrl)
         .client(okHttpClient)
         .build()
