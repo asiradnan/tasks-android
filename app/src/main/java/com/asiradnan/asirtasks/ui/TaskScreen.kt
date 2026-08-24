@@ -1,5 +1,10 @@
 package com.asiradnan.asirtasks.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -180,6 +185,10 @@ fun TaskBody(
     ) {
         var showDatePicker by remember { mutableStateOf(false) }
         var showTimePicker by remember { mutableStateOf(false) }
+        val notificationPermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { }
+        )
 
         Column(
             modifier = Modifier
@@ -213,7 +222,12 @@ fun TaskBody(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showDatePicker = true }
+                        .clickable {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                            showDatePicker = true
+                        }
                         .padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.CalendarMonth, contentDescription = null)
                     Spacer(Modifier.width(12.dp))
@@ -239,7 +253,12 @@ fun TaskBody(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { showTimePicker = true }
+                        .clickable {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                            showTimePicker = true
+                        }
                         .padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.AccessTime, contentDescription = null)
                     Spacer(Modifier.width(12.dp))
