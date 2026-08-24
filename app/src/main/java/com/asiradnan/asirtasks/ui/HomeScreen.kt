@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Circle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -83,13 +85,14 @@ fun HomeScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val syncStatus by viewModel.syncStatus.collectAsState()
     var showSyncDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val isDarkModePref by viewModel.isDarkMode.collectAsState()
     val effectiveDarkMode = isDarkModePref ?: androidx.compose.foundation.isSystemInDarkTheme()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(viewModel) {
-        viewModel.syncErrorMessage.collect { message ->
+        viewModel.uiMessage.collect { message ->
             snackbarHostState.showSnackbar(message = message)
         }
     }
@@ -103,7 +106,7 @@ fun HomeScreen(
                 isDarkMode = effectiveDarkMode,
                 onToggleTheme = { viewModel.toggleTheme(effectiveDarkMode) },
                 onAuthClick = {
-                    if (isLoggedIn) viewModel.logout() else navigateToAuth()
+                    if (isLoggedIn) showLogoutDialog = true else navigateToAuth()
                 },
                 syncStatus = syncStatus,
                 onSyncClick = { showSyncDialog = true },
@@ -151,6 +154,28 @@ fun HomeScreen(
                 onDismiss = { showSyncDialog = false },
                 onLoginClick = { navigateToAuth() },
                 onCancelSync = { viewModel.cancelSync() }
+            )
+        }
+        if (showLogoutDialog) {
+            AlertDialog(
+                onDismissRequest = { showLogoutDialog = false },
+                title = { Text(text = stringResource(R.string.confirm_logout_title)) },
+                text = { Text(text = stringResource(R.string.confirm_logout_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showLogoutDialog = false
+                            viewModel.logout()
+                        }
+                    ) {
+                        Text(stringResource(R.string.log_out))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showLogoutDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
             )
         }
     }

@@ -9,4 +9,8 @@
     <string name="mark_uncompleted">Mark uncompleted</string>
     <string name="mark_completed">Mark completed</string>
     <string name="log_in">Log In</string>
+    <string name="confirm_logout_title">Confirm Logout</string>
+    <string name="confirm_logout_message">Are you sure you want to log out?</string>
+    <string name="log_out">Log Out</string>
+    <string name="cancel">Cancel</string>
 </resources>

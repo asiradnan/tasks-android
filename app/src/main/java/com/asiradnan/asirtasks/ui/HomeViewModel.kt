@@ -31,8 +31,8 @@ class HomeViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    private val _syncErrorMessage = MutableSharedFlow<String>()
-    val syncErrorMessage = _syncErrorMessage.asSharedFlow()
+    private val _uiMessage = MutableSharedFlow<String>()
+    val uiMessage = _uiMessage.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -50,7 +50,7 @@ class HomeViewModel(
             try {
                 tasksRepository.refreshTasksFromServer()
             } catch (e: Exception) {
-                _syncErrorMessage.emit("Sync failed: ${e.localizedMessage ?: "Unknown error"}")
+                _uiMessage.emit("Sync failed: ${e.localizedMessage ?: "Unknown error"}")
             } finally {
                 _isRefreshing.value = false
             }
@@ -121,6 +121,7 @@ class HomeViewModel(
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
+            _uiMessage.emit("Logged out successfully")
         }
     }
 
