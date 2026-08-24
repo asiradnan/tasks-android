@@ -9,6 +9,7 @@ import com.asiradnan.asirtasks.data.Task
 import com.asiradnan.asirtasks.network.toEntity
 import com.asiradnan.asirtasks.network.toNetwork
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
@@ -25,6 +26,11 @@ class SyncWorker(
         val alarmScheduler = com.asiradnan.asirtasks.util.AlarmScheduler(applicationContext)
 
         return withContext(Dispatchers.IO) {
+            val token = container.tokenManager.accessToken.first()
+            if (token == null) {
+                Log.d("SyncWorker", "No access token found, skipping sync.")
+                return@withContext Result.failure()
+            }
             try {
                 // PHASE 1: PULL & COMPARE (Last Write Wins)
                 Log.d("SyncWorker", "Fetching remote tasks...")
@@ -67,10 +73,8 @@ class SyncWorker(
                             //     "UUID changed from ${task.uuid} to ${serverResponse.uuid}"
                             // )
                             finalTasksToDelete.add(task)
-                            finalTasksToUpsert.add(serverResponse.toEntity().copy(isSynced = true))
-                        } else {
-                            finalTasksToUpsert.add(task.copy(isSynced = true))
                         }
+                        finalTasksToUpsert.add(serverResponse.toEntity().copy(isSynced = true))
                     } catch (e: Exception) {
                         if (e is HttpException && (e.code() == 401 || e.code() == 403)) {
                             throw e // Rethrow to trigger outer logout logic
@@ -117,7 +121,13 @@ class SyncWorker(
                 Result.success()
             } catch (e: HttpException) {
                 Log.e("SyncWorker", "HttpException in sync: ${e.code()}", e)
-                if (e.code() == 401 || e.code() == 403) {
+                if (e.code() == 401) {
+                    // Token is truly dead (refresh failed), confirm logout
+                    container.tokenManager.clearTokens()
+                    return@withContext Result.failure()
+                }
+                if (e.code() == 403) {
+                    // Permission denied, but token is valid. DO NOT log out.
                     return@withContext Result.failure()
                 }
                 Result.retry()
