@@ -30,7 +30,6 @@ import androidx.compose.material.icons.Icons.Filled
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.AlertDialog
@@ -57,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -220,7 +220,7 @@ fun HomeBody(
             if (incompletedTaskList.isNotEmpty()) {
                 itemsIndexed(
                     incompletedTaskList,
-                    key = { _, task -> "${task.uuid}_incomplete" }) { index, task ->
+                    key = { _, task -> task.uuid }) { index, task ->
                     val isFirst = index == 0
                     val isLast = index == incompletedTaskList.size - 1
                     val shape = when {
@@ -288,9 +288,14 @@ fun HomeBody(
                                 text = "Completed (${completedTaskList.size})",
                                 style = MaterialTheme.typography.titleMedium
                             )
+                            val rotation by animateFloatAsState(
+                                targetValue = if (isCompletedExpanded) 180f else 0f,
+                                label = "expand_icon_rotation"
+                            )
                             Icon(
-                                imageVector = if (isCompletedExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                contentDescription = if (isCompletedExpanded) "Collapse" else "Expand"
+                                imageVector = Icons.Default.ExpandMore,
+                                contentDescription = if (isCompletedExpanded) "Collapse" else "Expand",
+                                modifier = Modifier.rotate(rotation)
                             )
                         }
                     }
@@ -299,9 +304,9 @@ fun HomeBody(
                 if (isCompletedExpanded) {
                     itemsIndexed(
                         completedTaskList,
-                        key = { _, task -> "${task.uuid}_completed" }) { index, task ->
+                        key = { _, task -> task.uuid }) { index, task ->
                         val isLast = index == completedTaskList.size - 1
-                        val shape = if (isLast) {
+                        val itemShape = if (isLast) {
                             RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
                         } else {
                             RoundedCornerShape(0.dp)
@@ -311,7 +316,7 @@ fun HomeBody(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 12.dp)
-                                .clip(shape)
+                                .clip(itemShape)
                                 .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
                                 .animateItem()
                         ) {
