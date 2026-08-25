@@ -61,7 +61,7 @@ class AlarmScheduler(private val context: Context) {
                         pendingIntent
                     )
                 } else {
-                    alarmManager.set(
+                    alarmManager.setAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         calendar.timeInMillis,
                         pendingIntent
