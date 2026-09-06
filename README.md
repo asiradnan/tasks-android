@@ -27,7 +27,8 @@ The Android client for Asir Tasks (https://tasks.asiradnan.com), built with Kotl
 - **UI Toolkit:** Jetpack Compose
 - **Local Storage:** Room Database
 - **Background Work:** WorkManager
-- **Min SDK:** 29 · **Target SDK:** 37
+- **Min SDK:** 29 
+- **Target SDK:** 37
 - **Build Tool:** Gradle (Kotlin DSL)
 
 ## License
