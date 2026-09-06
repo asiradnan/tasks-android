@@ -1,4 +1,4 @@
-# <img src="app/src/main/ic_launcher-playstore.png" alt="AsirTasks Icon" height="32" align="center"> AsirTasks
+# <img src="app/src/main/ic_launcher-playstore.png" alt="AsirTasks Icon" height="32" align="center"> Asir Tasks
 
 <p align="center">
   <img src="screenshots/phone/Screenshot_20260809_085414.png" alt="Tasbih Counter Screenshot" width="250"/>
